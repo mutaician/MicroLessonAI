@@ -52,14 +52,14 @@ export function App() {
 
   useEffect(() => {
     const onPop = () => setRoute(parseRoute());
-    window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
+    window.addEventListener("hashchange", onPop);
+    return () => window.removeEventListener("hashchange", onPop);
   }, []);
 
   const navigate = (next: Route) => {
     const path =
       next.name === "generate" ? "/" : next.name === "library" ? "/lessons" : `/lessons/${next.id}`;
-    window.history.pushState(null, "", path);
+    window.location.hash = path;
     setRoute(next);
   };
 
@@ -777,7 +777,7 @@ function isTerminalStatus(status: Lesson["status"]) {
 }
 
 function parseRoute(): Route {
-  const path = window.location.pathname;
+  const path = window.location.hash.replace(/^#/, "") || window.location.pathname;
 
   if (path === "/lessons") {
     return { name: "library" };
