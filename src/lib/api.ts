@@ -46,11 +46,11 @@ export async function createLesson(input: GenerateLessonInput) {
 }
 
 export async function generateLessonImage(id: string) {
-  return runLessonStep(`/api/lessons/${id}/image`, "Could not generate lesson image.");
+  return runLessonStep(`/api/lesson-image?id=${encodeURIComponent(id)}`, "Could not generate lesson image.");
 }
 
 export async function generateLessonVideo(id: string) {
-  return runLessonStep(`/api/lessons/${id}/video`, "Could not generate lesson video.");
+  return runLessonStep(`/api/lesson-video?id=${encodeURIComponent(id)}`, "Could not generate lesson video.");
 }
 
 export async function fetchLessons() {
@@ -65,7 +65,7 @@ export async function fetchLessons() {
 }
 
 export async function fetchLesson(id: string) {
-  const response = await fetch(`/api/lessons/${id}`);
+  const response = await fetch(`/api/lesson?id=${encodeURIComponent(id)}`);
   const payload = await readJson<{ lesson?: Lesson; error?: string }>(response);
 
   if (!response.ok || !payload.lesson) {

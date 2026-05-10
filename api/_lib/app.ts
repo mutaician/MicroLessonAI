@@ -36,6 +36,26 @@ app.get("/api/lessons/:id", async (c) => {
   }
 });
 
+app.get("/api/lesson", async (c) => {
+  const id = c.req.query("id");
+
+  if (!id) {
+    return c.json({ error: "Missing lesson id." }, 400);
+  }
+
+  try {
+    const lesson = await getLesson(id);
+    if (!lesson) {
+      return c.json({ error: "Lesson not found." }, 404);
+    }
+
+    return c.json({ lesson });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Could not load lesson.";
+    return c.json({ error: message }, 500);
+  }
+});
+
 app.post("/api/lessons", async (c) => {
   try {
     const body = await c.req.parseBody();
@@ -135,6 +155,17 @@ app.post("/api/lessons/:id/image", async (c) => {
   }
 });
 
+app.post("/api/lesson-image", async (c) => {
+  const id = c.req.query("id");
+
+  if (!id) {
+    return c.json({ error: "Missing lesson id." }, 400);
+  }
+
+  const image = await app.request(`/api/lessons/${id}/image`, { method: "POST" });
+  return c.json(await image.json(), image.ok ? 200 : image.status >= 500 ? 502 : 400);
+});
+
 app.post("/api/lessons/:id/video", async (c) => {
   const id = c.req.param("id");
 
@@ -173,6 +204,17 @@ app.post("/api/lessons/:id/video", async (c) => {
   }
 });
 
+app.post("/api/lesson-video", async (c) => {
+  const id = c.req.query("id");
+
+  if (!id) {
+    return c.json({ error: "Missing lesson id." }, 400);
+  }
+
+  const video = await app.request(`/api/lessons/${id}/video`, { method: "POST" });
+  return c.json(await video.json(), video.ok ? 200 : video.status >= 500 ? 502 : 400);
+});
+
 app.post("/api/lessons/generate", async (c) => {
   const planned = await app.request("/api/lessons", {
     method: "POST",
@@ -184,13 +226,13 @@ app.post("/api/lessons/generate", async (c) => {
     return c.json(payload, planned.status >= 500 ? 500 : 400);
   }
 
-  const image = await app.request(`/api/lessons/${payload.lesson.id}/image`, { method: "POST" });
+  const image = await app.request(`/api/lesson-image?id=${payload.lesson.id}`, { method: "POST" });
 
   if (!image.ok) {
     return c.json(await image.json(), image.status >= 500 ? 502 : 400);
   }
 
-  const video = await app.request(`/api/lessons/${payload.lesson.id}/video`, { method: "POST" });
+  const video = await app.request(`/api/lesson-video?id=${payload.lesson.id}`, { method: "POST" });
   return c.json(await video.json(), video.ok ? 200 : video.status >= 500 ? 502 : 400);
 });
 

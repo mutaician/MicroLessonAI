@@ -10,7 +10,6 @@
     "start": "bun server/index.ts"
   },
   "dependencies": {
-    "@hono/node-server": "^1.19.14",
     "@runwayml/sdk": "^3.21.0",
     "@supabase/supabase-js": "^2.49.8",
     "hono": "^4.7.11",
