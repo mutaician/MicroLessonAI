@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
-import { env } from "./env";
-import type { DbLesson, Lesson } from "./types";
+import { env } from "./env.js";
+import type { DbLesson, Lesson } from "./types.js";
 
 export const supabase = () =>
   createClient(env.supabaseUrl(), env.supabaseServiceRoleKey(), {

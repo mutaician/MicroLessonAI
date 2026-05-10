@@ -1,10 +1,10 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { createLessonPlan } from "./lessonPlanner";
-import { extractPdfText, normalizeSourceText, previewText } from "./pdf";
-import { generateLessonImage, generateLessonVideo } from "./runway";
-import { getLesson, insertLesson, listLessons, updateLesson } from "./store";
-import type { LearnerLevel, OutputFocus, SourceType, TutorStyle } from "./types";
+import { createLessonPlan } from "./lessonPlanner.js";
+import { extractPdfText, normalizeSourceText, previewText } from "./pdf.js";
+import { generateLessonImage, generateLessonVideo } from "./runway.js";
+import { getLesson, insertLesson, listLessons, updateLesson } from "./store.js";
+import type { LearnerLevel, OutputFocus, SourceType, TutorStyle } from "./types.js";
 
 export const app = new Hono();
 

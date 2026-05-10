@@ -1,5 +1,5 @@
-import { mapLesson, supabase } from "./supabase";
-import type { DbLesson } from "./types";
+import { mapLesson, supabase } from "./supabase.js";
+import type { DbLesson } from "./types.js";
 
 type NewLesson = Omit<DbLesson, "id" | "created_at" | "image_url" | "video_url" | "error_message"> & {
   image_url?: string | null;

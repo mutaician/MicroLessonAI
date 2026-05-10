@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { z } from "zod";
-import { env } from "./env";
-import type { LearnerLevel, LessonPlan, OutputFocus, TutorStyle } from "./types";
+import { env } from "./env.js";
+import type { LearnerLevel, LessonPlan, OutputFocus, TutorStyle } from "./types.js";
 
 const quizQuestionSchema = z.object({
   question: z.string().min(1),

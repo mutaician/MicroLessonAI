@@ -1,5 +1,5 @@
 import RunwayML, { TaskFailedError } from "@runwayml/sdk";
-import { env } from "./env";
+import { env } from "./env.js";
 
 type RunwayImageModel = "gpt_image_2";
 

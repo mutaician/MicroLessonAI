@@ -1,6 +1,6 @@
 import { serveStatic } from "hono/bun";
-import { app } from "./app";
-import { env } from "./env";
+import { app } from "./app.js";
+import { env } from "./env.js";
 
 app.use("/assets/*", serveStatic({ root: "./dist" }));
 app.get("*", serveStatic({ path: "./dist/index.html" }));
