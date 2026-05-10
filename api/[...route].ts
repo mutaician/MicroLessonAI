@@ -1,9 +1,11 @@
-import { handle } from "hono/vercel";
+import { handle } from "@hono/node-server/vercel";
 import { app } from "../server/app.js";
 
 export const config = {
-  runtime: "nodejs",
-  maxDuration: 300
+  maxDuration: 300,
+  api: {
+    bodyParser: false
+  }
 };
 
 export default handle(app);
