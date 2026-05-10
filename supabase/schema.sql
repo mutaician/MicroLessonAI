@@ -16,9 +16,11 @@ create table if not exists public.lessons (
   quiz_questions jsonb not null,
   image_prompt text not null,
   video_prompt text not null,
+  audio_script text not null default '',
   image_url text,
   video_url text,
-  status text not null check (status in ('planned', 'image_generating', 'video_pending', 'video_generating', 'complete', 'failed')),
+  audio_url text,
+  status text not null check (status in ('planned', 'image_generating', 'video_pending', 'video_generating', 'audio_pending', 'audio_generating', 'complete', 'failed')),
   error_message text,
   created_at timestamptz not null default now()
 );
@@ -29,4 +31,7 @@ alter table public.lessons enable row level security;
 
 alter table public.lessons drop constraint if exists lessons_status_check;
 alter table public.lessons add constraint lessons_status_check
-  check (status in ('planned', 'image_generating', 'video_pending', 'video_generating', 'complete', 'failed'));
+  check (status in ('planned', 'image_generating', 'video_pending', 'video_generating', 'audio_pending', 'audio_generating', 'complete', 'failed'));
+
+alter table public.lessons add column if not exists audio_script text not null default '';
+alter table public.lessons add column if not exists audio_url text;

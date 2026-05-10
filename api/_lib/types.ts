@@ -7,6 +7,8 @@ export type LessonStatus =
   | "image_generating"
   | "video_pending"
   | "video_generating"
+  | "audio_pending"
+  | "audio_generating"
   | "complete"
   | "failed";
 
@@ -23,6 +25,7 @@ export type LessonPlan = {
   visualMetaphor: string;
   imagePrompt: string;
   videoPrompt: string;
+  audioScript: string;
   keyTakeaways: string[];
   quizQuestions: QuizQuestion[];
 };
@@ -43,8 +46,10 @@ export type Lesson = {
   quizQuestions: QuizQuestion[];
   imagePrompt: string;
   videoPrompt: string;
+  audioScript: string;
   imageUrl: string | null;
   videoUrl: string | null;
+  audioUrl: string | null;
   status: LessonStatus;
   errorMessage: string | null;
   createdAt: string;
@@ -66,8 +71,10 @@ export type DbLesson = {
   quiz_questions: QuizQuestion[];
   image_prompt: string;
   video_prompt: string;
+  audio_script: string;
   image_url: string | null;
   video_url: string | null;
+  audio_url: string | null;
   status: LessonStatus;
   error_message: string | null;
   created_at: string;

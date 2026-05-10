@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createLessonPlan } from "./lessonPlanner.js";
 import { extractPdfText, normalizeSourceText, previewText } from "./pdf.js";
-import { generateLessonImage, generateLessonVideo } from "./runway.js";
+import { generateLessonAudio, generateLessonImage, generateLessonVideo } from "./runway.js";
 import { getLesson, insertLesson, listLessons, updateLesson } from "./store.js";
 import type { LearnerLevel, OutputFocus, SourceType, TutorStyle } from "./types.js";
 
@@ -111,6 +111,7 @@ app.post("/api/lessons", async (c) => {
       quiz_questions: lessonPlan.quizQuestions,
       image_prompt: lessonPlan.imagePrompt,
       video_prompt: lessonPlan.videoPrompt,
+      audio_script: lessonPlan.audioScript,
       status: "planned"
     });
 
@@ -139,7 +140,7 @@ app.post("/api/lessons/:id/image", async (c) => {
     const imageUrl = await generateLessonImage(lesson.imagePrompt);
     const updated = await updateLesson(id, {
       image_url: imageUrl,
-      status: "video_pending",
+      status: "audio_pending",
       error_message: null
     });
 
@@ -204,6 +205,44 @@ app.post("/api/lessons/:id/video", async (c) => {
   }
 });
 
+app.post("/api/lesson-audio", async (c) => {
+  const id = c.req.query("id");
+
+  if (!id) {
+    return c.json({ error: "Missing lesson id." }, 400);
+  }
+
+  try {
+    const lesson = await getLesson(id);
+
+    if (!lesson) {
+      return c.json({ error: "Lesson not found." }, 404);
+    }
+
+    await updateLesson(id, {
+      status: "audio_generating",
+      error_message: null
+    });
+
+    const audioUrl = await generateLessonAudio(lesson.audioScript, lesson.tutorStyle);
+    const updated = await updateLesson(id, {
+      audio_url: audioUrl,
+      status: "video_pending",
+      error_message: null
+    });
+
+    return c.json({ lesson: updated });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Audio generation failed.";
+    const failed = await updateLesson(id, {
+      status: "failed",
+      error_message: message
+    }).catch(() => null);
+
+    return c.json({ error: message, lesson: failed }, 502);
+  }
+});
+
 app.post("/api/lesson-video", async (c) => {
   const id = c.req.query("id");
 
@@ -230,6 +269,12 @@ app.post("/api/lessons/generate", async (c) => {
 
   if (!image.ok) {
     return c.json(await image.json(), image.status >= 500 ? 502 : 400);
+  }
+
+  const audio = await app.request(`/api/lesson-audio?id=${payload.lesson.id}`, { method: "POST" });
+
+  if (!audio.ok) {
+    return c.json(await audio.json(), audio.status >= 500 ? 502 : 400);
   }
 
   const video = await app.request(`/api/lesson-video?id=${payload.lesson.id}`, { method: "POST" });

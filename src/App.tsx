@@ -12,7 +12,14 @@ import {
   Upload
 } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
-import { createLesson, fetchLesson, fetchLessons, generateLessonImage, generateLessonVideo } from "./lib/api";
+import {
+  createLesson,
+  fetchLesson,
+  fetchLessons,
+  generateLessonAudio,
+  generateLessonImage,
+  generateLessonVideo
+} from "./lib/api";
 import type { LearnerLevel, Lesson, OutputFocus, SourceType, TutorStyle } from "./types";
 
 const levels: Array<{ value: LearnerLevel; label: string }> = [
@@ -38,6 +45,7 @@ const progressSteps = [
   "Reading material",
   "Planning lesson",
   "Creating visual",
+  "Generating audio",
   "Generating video",
   "Saving lesson"
 ];
@@ -143,9 +151,13 @@ function GenerateView({ navigate }: { navigate: (route: Route) => void }) {
       setLiveLesson(imageLesson);
       setStepIndex(3);
 
+      const audioLesson = await generateLessonAudio(lesson.id);
+      setLiveLesson(audioLesson);
+      setStepIndex(4);
+
       const videoLesson = await generateLessonVideo(lesson.id);
       setLiveLesson(videoLesson);
-      setStepIndex(4);
+      setStepIndex(5);
       setLastLesson(videoLesson);
     } catch (caught) {
       const generationError = caught as Error & { lesson?: Lesson };
@@ -313,6 +325,13 @@ function LiveLessonPreview({ lesson, navigate }: { lesson: Lesson; navigate: (ro
           </div>
         )}
       </div>
+
+      {lesson.audioUrl && (
+        <div className="mt-4 rounded-lg border border-ink/10 bg-paper p-3">
+          <div className="mb-2 text-sm font-semibold text-ink/70">Narration</div>
+          <audio className="w-full" src={lesson.audioUrl} controls />
+        </div>
+      )}
 
       <ul className="mt-4 space-y-2 text-sm leading-6 text-ink/65">
         {lesson.keyTakeaways.map((takeaway) => (
@@ -523,6 +542,28 @@ function LessonDetailView({ id, navigate }: { id: string; navigate: (route: Rout
             </div>
           </div>
 
+          <div className="rounded-lg border border-ink/10 bg-white p-5 shadow-soft">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold">Audio narration</h2>
+                <p className="mt-1 text-sm text-ink/55">{lesson.audioUrl ? "Generated with Runway text-to-speech." : statusLabel(lesson.status)}</p>
+              </div>
+              {!lesson.audioUrl && !isTerminalStatus(lesson.status) && (
+                <span className="inline-flex items-center gap-2 text-sm font-medium text-ink/55">
+                  <Loader2 className="animate-spin" size={16} />
+                  Preparing audio
+                </span>
+              )}
+            </div>
+            {lesson.audioUrl ? (
+              <audio className="mt-4 w-full" src={lesson.audioUrl} controls />
+            ) : (
+              <div className="mt-4 rounded-lg bg-paper p-4 text-sm leading-6 text-ink/60">
+                The narration appears here when the audio step finishes.
+              </div>
+            )}
+          </div>
+
           {lesson.status === "failed" && lesson.errorMessage && (
             <div className="flex items-start gap-3 rounded-lg border border-coral/30 bg-coral/10 p-4 text-sm">
               <CircleAlert className="mt-0.5 shrink-0 text-coral" size={18} />
@@ -573,10 +614,14 @@ function MediaPendingPanel({ lesson }: { lesson: Lesson }) {
       : lesson.status === "image_generating"
         ? "Creating the lesson image."
         : lesson.status === "video_pending"
-          ? "Image is ready. Video generation is next."
+          ? "Audio is ready. Video generation is next."
           : lesson.status === "video_generating"
             ? "Generating the explainer video."
-            : "Video is not available yet.";
+            : lesson.status === "audio_pending"
+              ? "Video is ready. Audio narration is next."
+              : lesson.status === "audio_generating"
+                ? "Generating the audio narration."
+                : "Video is not available yet.";
 
   return (
     <div className="grid aspect-video place-items-center bg-ink text-paper">
@@ -765,6 +810,8 @@ function statusLabel(status: Lesson["status"]) {
     image_generating: "Creating image",
     video_pending: "Image ready",
     video_generating: "Generating video",
+    audio_pending: "Video ready",
+    audio_generating: "Generating audio",
     complete: "Complete",
     failed: "Failed"
   };

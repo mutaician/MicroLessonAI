@@ -7,6 +7,8 @@ export type LessonStatus =
   | "image_generating"
   | "video_pending"
   | "video_generating"
+  | "audio_pending"
+  | "audio_generating"
   | "complete"
   | "failed";
 
@@ -32,8 +34,10 @@ export type Lesson = {
   quizQuestions: QuizQuestion[];
   imagePrompt: string;
   videoPrompt: string;
+  audioScript: string;
   imageUrl: string | null;
   videoUrl: string | null;
+  audioUrl: string | null;
   status: LessonStatus;
   errorMessage: string | null;
   createdAt: string;

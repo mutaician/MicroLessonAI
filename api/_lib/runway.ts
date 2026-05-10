@@ -1,7 +1,51 @@
 import RunwayML, { TaskFailedError } from "@runwayml/sdk";
 import { env } from "./env.js";
+import type { TutorStyle } from "./types.js";
 
 type RunwayImageModel = "gpt_image_2";
+type RunwayTtsVoice =
+  | "Maya"
+  | "Arjun"
+  | "Serene"
+  | "Bernard"
+  | "Billy"
+  | "Mark"
+  | "Clint"
+  | "Mabel"
+  | "Chad"
+  | "Leslie"
+  | "Eleanor"
+  | "Elias"
+  | "Elliot"
+  | "Sandra"
+  | "Kirk"
+  | "Kylie"
+  | "Lara"
+  | "Lisa"
+  | "Malachi"
+  | "Marlene"
+  | "Martin"
+  | "Miriam"
+  | "Paula"
+  | "Pip"
+  | "Rusty"
+  | "Maggie"
+  | "Jack"
+  | "Katie"
+  | "Noah"
+  | "James"
+  | "Rina"
+  | "Ella"
+  | "Mariah"
+  | "Frank"
+  | "Claudia"
+  | "Niki"
+  | "Vincent"
+  | "Tom"
+  | "Wanda"
+  | "Benjamin"
+  | "Kiana"
+  | "Rachel";
 
 export async function generateLessonImage(imagePrompt: string) {
   env.runwayApiSecret();
@@ -57,6 +101,43 @@ export async function generateLessonVideo(promptImage: string, videoPrompt: stri
 
     throw error;
   }
+}
+
+export async function generateLessonAudio(audioScript: string, tutorStyle: TutorStyle) {
+  env.runwayApiSecret();
+  const client = new RunwayML();
+
+  try {
+    const audioTask = await client.textToSpeech
+      .create({
+        model: "eleven_multilingual_v2",
+        promptText: audioScript.slice(0, 1000),
+        voice: {
+          type: "runway-preset",
+          presetId: voiceForTutorStyle(tutorStyle)
+        }
+      })
+      .waitForTaskOutput();
+
+    return firstOutputUrl(audioTask.output);
+  } catch (error) {
+    if (error instanceof TaskFailedError) {
+      throw new Error(`Runway audio generation failed: ${JSON.stringify(error.taskDetails)}`);
+    }
+
+    throw error;
+  }
+}
+
+function voiceForTutorStyle(tutorStyle: TutorStyle): RunwayTtsVoice {
+  const voices: Record<TutorStyle, string> = {
+    calm: env.runwayTtsVoiceCalm,
+    energetic: env.runwayTtsVoiceEnergetic,
+    storyteller: env.runwayTtsVoiceStoryteller,
+    "exam-prep": env.runwayTtsVoiceExamPrep
+  };
+
+  return voices[tutorStyle] as RunwayTtsVoice;
 }
 
 function firstOutputUrl(output: unknown) {

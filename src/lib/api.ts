@@ -53,6 +53,10 @@ export async function generateLessonVideo(id: string) {
   return runLessonStep(`/api/lesson-video?id=${encodeURIComponent(id)}`, "Could not generate lesson video.");
 }
 
+export async function generateLessonAudio(id: string) {
+  return runLessonStep(`/api/lesson-audio?id=${encodeURIComponent(id)}`, "Could not generate lesson audio.");
+}
+
 export async function fetchLessons() {
   const response = await fetch("/api/lessons");
   const payload = await readJson<{ lessons?: Lesson[]; error?: string }>(response);

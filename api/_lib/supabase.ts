@@ -26,8 +26,10 @@ export const mapLesson = (lesson: DbLesson): Lesson => ({
   quizQuestions: lesson.quiz_questions,
   imagePrompt: lesson.image_prompt,
   videoPrompt: lesson.video_prompt,
+  audioScript: lesson.audio_script,
   imageUrl: lesson.image_url,
   videoUrl: lesson.video_url,
+  audioUrl: lesson.audio_url,
   status: lesson.status,
   errorMessage: lesson.error_message,
   createdAt: lesson.created_at

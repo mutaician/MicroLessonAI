@@ -16,6 +16,7 @@ const lessonPlanZodSchema = z.object({
   visualMetaphor: z.string().min(1),
   imagePrompt: z.string().min(1),
   videoPrompt: z.string().min(1),
+  audioScript: z.string().min(1),
   keyTakeaways: z.array(z.string().min(1)).min(1),
   quizQuestions: z.array(quizQuestionSchema).min(1)
 });
@@ -30,6 +31,7 @@ const lessonPlanJsonSchema = {
     visualMetaphor: { type: "string" },
     imagePrompt: { type: "string" },
     videoPrompt: { type: "string" },
+    audioScript: { type: "string" },
     keyTakeaways: {
       type: "array",
       items: { type: "string" }
@@ -58,6 +60,7 @@ const lessonPlanJsonSchema = {
     "visualMetaphor",
     "imagePrompt",
     "videoPrompt",
+    "audioScript",
     "keyTakeaways",
     "quizQuestions"
   ]
@@ -105,6 +108,7 @@ export async function createLessonPlan(input: PlannerInput): Promise<LessonPlan>
           "Each quiz question must include exactly 4 answer options.",
           "The image prompt should describe a clean educational illustration or diagram.",
           "The video prompt should describe a 5-second explainer animation with clear visual motion.",
+          "The audio script should be a spoken narration under 900 characters that explains the concept clearly.",
           `Source material:\n${input.sourceText}`
         ].join("\n\n")
       }
@@ -146,6 +150,7 @@ function normalizeLessonPlan(plan: z.infer<typeof lessonPlanZodSchema>): LessonP
 
   return {
     ...plan,
+    audioScript: plan.audioScript.slice(0, 900),
     keyTakeaways,
     quizQuestions
   };
